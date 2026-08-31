@@ -300,7 +300,7 @@
           <div class="ex-card">
             ${EXERCISE_IMAGES[e.name] ? `
               <figure class="ex-visual">
-                <img src="${esc(EXERCISE_IMAGES[e.name].src)}" alt="${esc(EXERCISE_IMAGES[e.name].alt)}"
+                <img src="${esc(EXERCISE_IMAGES[e.name].src)}?v=${EXERCISE_ASSET_VERSION}" alt="${esc(EXERCISE_IMAGES[e.name].alt)}"
                   width="960" height="640" loading="lazy" decoding="async">
               </figure>` : ""}
             <div class="ex-title"><h4>${e.name}</h4></div>

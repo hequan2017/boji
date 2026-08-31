@@ -245,6 +245,7 @@ const EXERCISES = [
 ];
 
 /* ---------- 动作库图片（本地 WebP，按需懒加载） ---------- */
+const EXERCISE_ASSET_VERSION = "20260831-1";
 const EXERCISE_IMAGES = {
   "俯卧撑": { src: "assets/exercises/push-up.webp", alt: "标准俯卧撑侧面动作示范" },
   "哑铃平板卧推": { src: "assets/exercises/dumbbell-bench-press.webp", alt: "哑铃平板卧推动作示范" },
