@@ -244,6 +244,23 @@ const EXERCISES = [
     cues: "下背贴地，对侧手脚缓慢伸直，呼气时保持腹部收紧。", mistakes: "腰离地、动作太快、憋气。", alt: "只动腿或只动手的简化版本" },
 ];
 
+/* ---------- 动作库图片（本地 WebP，按需懒加载） ---------- */
+const EXERCISE_IMAGES = {
+  "俯卧撑": { src: "assets/exercises/push-up.webp", alt: "标准俯卧撑侧面动作示范" },
+  "哑铃平板卧推": { src: "assets/exercises/dumbbell-bench-press.webp", alt: "哑铃平板卧推动作示范" },
+  "高位下拉": { src: "assets/exercises/lat-pulldown.webp", alt: "高位下拉正面动作示范" },
+  "单臂哑铃划船": { src: "assets/exercises/one-arm-dumbbell-row.webp", alt: "单臂哑铃划船动作示范" },
+  "坐姿划船": { src: "assets/exercises/seated-cable-row.webp", alt: "坐姿绳索划船动作示范" },
+  "坐姿哑铃推举": { src: "assets/exercises/seated-dumbbell-press.webp", alt: "坐姿哑铃推举动作示范" },
+  "哑铃侧平举": { src: "assets/exercises/dumbbell-lateral-raise.webp", alt: "站姿哑铃侧平举动作示范" },
+  "高脚杯深蹲": { src: "assets/exercises/goblet-squat.webp", alt: "高脚杯深蹲动作示范" },
+  "哑铃罗马尼亚硬拉": { src: "assets/exercises/dumbbell-rdl.webp", alt: "哑铃罗马尼亚硬拉动作示范" },
+  "反向箭步蹲": { src: "assets/exercises/reverse-lunge.webp", alt: "反向箭步蹲动作示范" },
+  "臀桥": { src: "assets/exercises/glute-bridge.webp", alt: "地面臀桥动作示范" },
+  "平板支撑": { src: "assets/exercises/forearm-plank.webp", alt: "前臂平板支撑动作示范" },
+  "死虫式": { src: "assets/exercises/dead-bug.webp", alt: "死虫式核心训练动作示范" },
+};
+
 /* ---------- 饮食：一日食谱示例（约 3000 kcal） ---------- */
 const MEALS = [
   { time: "08:00", name: "早餐", kcal: "约 650 kcal", items: "燕麦 80g + 全脂牛奶 300ml + 全蛋 2 个 + 香蕉 1 根" },

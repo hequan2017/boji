@@ -590,11 +590,36 @@ details.ws .ws-body { padding: 0 16px 12px; font-size: 12.5px; color: var(--mute
   border-radius: var(--radius);
   background: var(--card);
   padding: 22px;
+  overflow: hidden;
   transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 .ex-card:hover { transform: translateY(-3px); border-color: var(--line2); box-shadow: var(--shadow); }
+.ex-visual {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  margin: -22px -22px 20px;
+  overflow: hidden;
+  background: #0c0d10;
+  border-bottom: 1px solid var(--line);
+}
+.ex-visual::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 28%;
+  pointer-events: none;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.2));
+}
+.ex-visual img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.55s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.ex-card:hover .ex-visual img { transform: scale(1.025); }
 .ex-card .ex-title { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-.ex-card h4 { font-size: 15.5px; }
+.ex-card h4 { font-size: 19px; letter-spacing: -0.025em; }
 .ex-card .ex-part { font-size: 12px; color: var(--muted2); margin-top: 2px; }
 .ex-card .ex-tags { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0; }
 .ex-card dl { margin: 0; font-size: 13px; color: var(--muted); }
