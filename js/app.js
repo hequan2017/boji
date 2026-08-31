@@ -61,7 +61,7 @@
   function applyTheme(t) {
     document.documentElement.dataset.theme = t;
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute("content", t === "light" ? "#f4f6f9" : "#0a0e13");
+    if (meta) meta.setAttribute("content", t === "light" ? "#f5f5f7" : "#000000");
   }
   applyTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark");
   // 系统主题变化时，未手动设置过的用户自动跟随
@@ -378,22 +378,22 @@
       <div class="card" style="margin-bottom:14px">
         <div class="nutri-form">
           <div class="field">
-            <label>性别</label>
+            <label for="nf-gender">性别</label>
             <select id="nf-gender">
               <option value="male" ${profile.gender === "male" ? "selected" : ""}>男</option>
               <option value="female" ${profile.gender === "female" ? "selected" : ""}>女</option>
             </select>
           </div>
-          <div class="field"><label>年龄</label><input id="nf-age" type="number" min="14" max="80" value="${profile.age}"></div>
-          <div class="field"><label>身高 cm</label><input id="nf-height" type="number" min="120" max="230" value="${profile.height}"></div>
-          <div class="field"><label>当前体重 kg</label><input id="nf-weight" type="number" min="35" max="200" step="0.1" value="${profile.weight}"></div>
+          <div class="field"><label for="nf-age">年龄</label><input id="nf-age" type="number" min="14" max="80" value="${profile.age}"></div>
+          <div class="field"><label for="nf-height">身高 cm</label><input id="nf-height" type="number" min="120" max="230" value="${profile.height}"></div>
+          <div class="field"><label for="nf-weight">当前体重 kg</label><input id="nf-weight" type="number" min="35" max="200" step="0.1" value="${profile.weight}"></div>
           <div class="field">
-            <label>活动量</label>
+            <label for="nf-activity">活动量</label>
             <select id="nf-activity">
               ${actOpts.map(([v, t]) => `<option value="${v}" ${profile.activity === v ? "selected" : ""}>${t}</option>`).join("")}
             </select>
           </div>
-          <div class="field"><label>目标体重 kg</label><input id="nf-target" type="number" min="40" max="200" step="0.5" value="${profile.target}"></div>
+          <div class="field"><label for="nf-target">目标体重 kg</label><input id="nf-target" type="number" min="40" max="200" step="0.5" value="${profile.target}"></div>
         </div>
         <p class="muted2" style="font-size:12px;margin:10px 0 0">Mifflin-St Jeor 公式估算 BMR，仅供参考；实际以每周体重变化为准进行微调。</p>
       </div>
@@ -554,6 +554,20 @@
     save(KEY.week, selWeek);
   }
 
+  function updateProfileFromForm() {
+    const get = (id) => document.getElementById(id);
+    if (!get("nf-gender")) return;
+    profile = normalizeProfile({
+      gender: get("nf-gender").value,
+      age: get("nf-age").value,
+      height: get("nf-height").value,
+      weight: get("nf-weight").value,
+      activity: get("nf-activity").value,
+      target: get("nf-target").value,
+    });
+    save(KEY.profile, profile);
+  }
+
   document.addEventListener("click", (e) => {
     const t = e.target;
 
@@ -649,22 +663,16 @@
     }
   });
 
+  // 输入时先持久化，避免切换页面前尚未触发 change 导致最后一次修改丢失。
+  document.addEventListener("input", (e) => {
+    if (e.target.id && e.target.id.startsWith("nf-")) updateProfileFromForm();
+  });
+
   // 导入文件选择
   document.addEventListener("change", (e) => {
     // 饮食表单：任一输入变化 → 保存档案并重算
     if (e.target.id && e.target.id.startsWith("nf-")) {
-      const g = (id) => document.getElementById(id);
-      const num = (id, fallback) => {
-        const v = parseFloat(g(id).value);
-        return Number.isFinite(v) ? v : fallback;
-      };
-      profile.gender = g("nf-gender").value === "female" ? "female" : "male";
-      profile.age = Math.min(Math.max(num("nf-age", 25), 14), 80);
-      profile.height = Math.min(Math.max(num("nf-height", 183), 120), 230);
-      profile.weight = Math.min(Math.max(num("nf-weight", 68), 35), 200);
-      profile.activity = num("nf-activity", 1.55);
-      profile.target = Math.min(Math.max(num("nf-target", 72), 40), 200);
-      save(KEY.profile, profile);
+      updateProfileFromForm();
       render(true);
       return;
     }

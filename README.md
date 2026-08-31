@@ -62,6 +62,17 @@ npx serve .
 
 **Settings → Pages → Source** 选择 `main` 分支 `/ (root)`，保存即可，无需任何构建。
 
+## 📁 项目结构
+
+```
+boji/
+├── index.html                  # 入口页面（直接双击即可打开）
+├── css/style.css               # 深浅双主题样式（CSS 变量驱动）
+├── js/data.js                  # 全部训练/饮食内容（定制计划改这里）
+├── js/app.js                   # 路由、视图、图表与 localStorage 逻辑
+└── .github/workflows/deploy.yml  # GitHub Pages 自动部署
+```
+
 ## 🛠️ 定制自己的计划
 
 所有内容都是数据驱动，编辑 [`js/data.js`](js/data.js)：
@@ -106,6 +117,15 @@ const PROFILE_DEFAULT = {
 - 增加动作库条目 / 饮食方案
 - 改进 UI 或无障碍支持
 - 翻译（i18n）
+
+## 📝 更新日志
+
+- **2026-08-31 · v1.1**
+  - 新增深色 / 浅色双主题：默认跟随系统偏好，右上角按钮手动切换并记忆选择
+  - 移除体重曲线模块，追踪页聚焦训练打卡与完成率统计（体重在「饮食」页资料中维护并联动计算）
+  - CI 升级至 Node 24 版 Actions（checkout@v5 / configure-pages@v6 / upload-pages-artifact@v5 / deploy-pages@v5），并支持自动开启 Pages
+- **2026-08-31 · v1.0**
+  - 首个版本：16 周 · 4 阶段训练计划、34 个动作的动作库、饮食热量计算、训练打卡与数据导出
 
 ## 📄 许可证
 
