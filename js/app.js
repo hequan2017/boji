@@ -28,6 +28,34 @@
     try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) { /* 隐私模式等场景静默失败 */ }
   }
 
+  const clamp = (value, min, max, fallback) => {
+    const n = Number(value);
+    return Number.isFinite(n) ? Math.min(Math.max(n, min), max) : fallback;
+  };
+
+  function normalizeProfile(value) {
+    const source = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+    const activities = [1.2, 1.375, 1.55, 1.725];
+    const activity = Number(source.activity);
+    return {
+      gender: source.gender === "female" ? "female" : "male",
+      age: clamp(source.age, 14, 80, PROFILE_DEFAULT.age),
+      height: clamp(source.height, 120, 230, PROFILE_DEFAULT.height),
+      weight: clamp(source.weight, 35, 200, PROFILE_DEFAULT.weight),
+      activity: activities.includes(activity) ? activity : PROFILE_DEFAULT.activity,
+      target: clamp(source.target, 40, 200, PROFILE_DEFAULT.target),
+    };
+  }
+
+  function normalizeCheckins(value) {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+    const result = {};
+    for (let week = 1; week <= 16; week++) {
+      if (Array.isArray(value[week])) result[week] = value[week].slice(0, 7).map(Boolean);
+    }
+    return result;
+  }
+
   /* ================= 主题（深色 / 浅色） ================= */
   // 首选用户手动选择，其次跟随系统（index.html 头部脚本已做首次应用）
   function applyTheme(t) {
@@ -38,14 +66,17 @@
   applyTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark");
   // 系统主题变化时，未手动设置过的用户自动跟随
   if (window.matchMedia) {
-    matchMedia("(prefers-color-scheme: light)").addEventListener("change", (e) => {
+    const colorScheme = matchMedia("(prefers-color-scheme: light)");
+    const onSchemeChange = (e) => {
       if (localStorage.getItem(THEME_KEY) === null) applyTheme(e.matches ? "light" : "dark");
-    });
+    };
+    if (colorScheme.addEventListener) colorScheme.addEventListener("change", onSchemeChange);
+    else if (colorScheme.addListener) colorScheme.addListener(onSchemeChange);
   }
 
-  let profile = Object.assign({}, PROFILE_DEFAULT, load(KEY.profile, {}));
-  let checkins = load(KEY.checkins, {});     // { "3": [true,false,true] }
-  let selWeek = Math.min(Math.max(load(KEY.week, 1), 1), 16);
+  let profile = normalizeProfile(load(KEY.profile, {}));
+  let checkins = normalizeCheckins(load(KEY.checkins, {})); // { "3": [true,false,true] }
+  let selWeek = Math.round(clamp(load(KEY.week, 1), 1, 16, 1));
   let exFilter = "全部";
 
   /* ================= 工具 ================= */
@@ -66,7 +97,9 @@
     return n;
   }
   function doneTotal() {
-    return Object.values(checkins).reduce((s, arr) => s + (arr || []).filter(Boolean).length, 0);
+    let n = 0;
+    for (let w = 1; w <= 16; w++) n += (checkins[w] || []).slice(0, weekDays(w).length).filter(Boolean).length;
+    return n;
   }
   function weekDone(w) {
     const arr = checkins[w] || [];
@@ -110,7 +143,7 @@
         <div class="badge-row">
           <span class="tag tag-accent">开源 · 纯前端</span>
           <span class="tag">零依赖 · 数据本地存储</span>
-          <span class="tag tag-blue">为 183cm / 68kg 定制</span>
+          <span class="tag tag-blue">为 ${round1(profile.height)}cm / ${round1(profile.weight)}kg 定制</span>
         </div>
         <h1>瘦子的<span class="hl">薄肌</span>养成计划<span class="thin"> · 16 周</span></h1>
         <p class="lead">
@@ -123,10 +156,10 @@
           <a class="btn btn-ghost" href="#nutrition">先看怎么吃</a>
         </div>
         <div class="stat-grid">
-          <div class="stat-card"><div class="num">183<small>cm</small></div><div class="lbl">身高</div></div>
+          <div class="stat-card"><div class="num">${round1(profile.height)}<small>cm</small></div><div class="lbl">身高（饮食页可修改）</div></div>
           <div class="stat-card"><div class="num">${round1(profile.weight)}<small>kg</small></div><div class="lbl">当前体重（饮食页可修改）</div></div>
           <div class="stat-card"><div class="num">${b}<small> · ${bmiLabel(b)}</small></div><div class="lbl">BMI（中国标准）</div></div>
-          <div class="stat-card"><div class="num">+3~5<small>kg</small></div><div class="lbl">16 周目标：${profile.target}kg 精瘦体重</div></div>
+          <div class="stat-card"><div class="num">${round1(profile.target - profile.weight) >= 0 ? "+" : ""}${round1(profile.target - profile.weight)}<small>kg</small></div><div class="lbl">距离目标体重 ${round1(profile.target)}kg</div></div>
         </div>
       </div>
 
@@ -171,7 +204,7 @@
       const all = weekAllDone(w);
       const lbl = WEEK_BADGE[w] || phaseOf(w).sub.split(" ")[0];
       return `<button class="week-btn ${w === selWeek ? "active" : ""} ${all ? "done" : ""}"
-        data-week="${w}">W${w}<span class="wk-lbl">${lbl}</span></button>`;
+        data-week="${w}" aria-pressed="${w === selWeek}">W${w}<span class="wk-lbl">${lbl}</span></button>`;
     }).join("");
 
     const dayCards = days.map((key, i) => {
@@ -180,7 +213,7 @@
       return `
       <div class="day-card ${done ? "done" : ""}">
         <label class="day-head">
-          <input type="checkbox" data-check-day="${i}" ${done ? "checked" : ""}>
+          <input type="checkbox" data-check-day="${i}" aria-label="${esc(tpl.name)}训练打卡" ${done ? "checked" : ""}>
           <span class="day-name">${tpl.name}</span>
           <span class="tag">${tpl.tag}</span>
         </label>
@@ -249,7 +282,7 @@
   function viewExercises() {
     const muscles = ["全部", "胸", "背", "肩", "腿", "手臂", "核心"];
     const chips = muscles.map((m) =>
-      `<button class="chip ${exFilter === m ? "active" : ""}" data-exfilter="${m}">${m}</button>`
+      `<button class="chip ${exFilter === m ? "active" : ""}" data-exfilter="${m}" aria-pressed="${exFilter === m}">${m}</button>`
     ).join("");
     const list = EXERCISES.filter((e) => exFilter === "全部" || e.muscle === exFilter);
 
@@ -430,7 +463,7 @@
       const days = weekDays(w);
       const arr = checkins[w] || [];
       const dots = days.map((_, di) =>
-        `<button class="ck-dot ${arr[di] ? "done" : ""}" data-check-week="${w}" data-check-idx="${di}" title="第${w}周 · 第${di + 1}练">${di + 1}</button>`
+        `<button class="ck-dot ${arr[di] ? "done" : ""}" data-check-week="${w}" data-check-idx="${di}" aria-label="第 ${w} 周第 ${di + 1} 练${arr[di] ? "，已完成" : "，未完成"}" aria-pressed="${!!arr[di]}" title="第${w}周 · 第${di + 1}练">${di + 1}</button>`
       ).join("");
       return `
       <div class="checkin-row" style="--pc:${p.color}">
@@ -489,7 +522,10 @@
 
   function syncNav(route) {
     document.querySelectorAll("[data-route]").forEach((a) => {
-      a.classList.toggle("active", a.dataset.route === route);
+      const active = a.dataset.route === route;
+      a.classList.toggle("active", active);
+      if (active) a.setAttribute("aria-current", "page");
+      else a.removeAttribute("aria-current");
     });
   }
 
@@ -506,6 +542,7 @@
 
   /* ================= 事件（全局委托） ================= */
   function toggleCheckin(week, idx) {
+    if (!Number.isInteger(week) || week < 1 || week > 16 || !Number.isInteger(idx) || idx < 0 || idx >= weekDays(week).length) return;
     const arr = checkins[week] || [];
     arr[idx] = !arr[idx];
     checkins[week] = arr;
@@ -586,8 +623,10 @@
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
       a.download = "boji-backup.json";
+      document.body.appendChild(a);
       a.click();
-      URL.revokeObjectURL(a.href);
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 0);
       return;
     }
 
@@ -634,13 +673,20 @@
     if (e.target.id === "import-file") {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
+      if (file.size > 1024 * 1024) {
+        alert("导入失败：备份文件不能超过 1 MB。");
+        e.target.value = "";
+        return;
+      }
       const reader = new FileReader();
       reader.onload = () => {
         try {
           const data = JSON.parse(reader.result);
-          if (data.app !== "boji") throw new Error("not a boji backup");
-          if (data.profile) { profile = Object.assign({}, PROFILE_DEFAULT, data.profile); save(KEY.profile, profile); }
-          if (data.checkins && typeof data.checkins === "object") { checkins = data.checkins; save(KEY.checkins, checkins); }
+          if (!data || data.app !== "boji" || data.version !== 1) throw new Error("not a boji backup");
+          profile = normalizeProfile(data.profile);
+          checkins = normalizeCheckins(data.checkins);
+          save(KEY.profile, profile);
+          save(KEY.checkins, checkins);
           alert("导入成功 ✓");
           render(false);
         } catch (err) {

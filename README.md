@@ -53,9 +53,8 @@ npx serve .
 ### 方式一：GitHub Actions（推荐，仓库已带工作流）
 
 1. 把本仓库推送到 GitHub；
-2. 仓库页面进入 **Settings → Pages**；
-3. **Source** 选择 **GitHub Actions**；
-4. 推送代码到 `main` 分支后自动部署，地址为 `https://<用户名>.github.io/<仓库名>/`。
+2. 推送到 `main` 分支即可——工作流会**自动开启 Pages 并部署**（无需手动设置）；
+3. 地址为 `https://<用户名>.github.io/<仓库名>/`。
 
 仓库中的 [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) 会自动完成部署。
 

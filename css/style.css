@@ -89,6 +89,11 @@ ul { margin: 0.4em 0; padding-left: 1.2em; }
 .muted2 { color: var(--muted2); }
 .accent { color: var(--accent); }
 
+:where(a, button, input, select, summary):focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
 /* ---------- 顶栏 ---------- */
 .topbar {
   position: sticky;
@@ -805,4 +810,13 @@ html[data-theme="light"] .ex-card:hover { box-shadow: var(--shadow); }
   .topbar, .bottomnav, .footer { display: none; }
   body { background: #fff; color: #111; }
   .card, .day-card, .ex-card { border-color: #ddd; background: #fff; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
