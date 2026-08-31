@@ -653,6 +653,28 @@ details.ws .ws-body { padding: 0 16px 12px; font-size: 12.5px; color: var(--mute
 .m-bar { height: 8px; border-radius: 999px; background: var(--card2); overflow: hidden; }
 .m-bar i { display: block; height: 100%; border-radius: 999px; }
 
+.diet-step-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.diet-step {
+  position: relative;
+  min-height: 210px;
+  padding: 28px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+.diet-step-no {
+  display: block;
+  margin-bottom: 30px;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.diet-step h3 { font-size: 20px; letter-spacing: -0.025em; }
+.diet-step p, .easy-meal-card p { margin-top: 10px; color: var(--muted); font-size: 14px; }
+.easy-meal-card h3 { font-size: 17px; }
+
 .meal-timeline { position: relative; padding-left: 22px; }
 .meal-timeline::before {
   content: "";
@@ -806,6 +828,9 @@ html[data-theme="light"] .ex-card:hover { box-shadow: var(--shadow); }
   .day-grid { grid-template-columns: 1fr; }
   .ex-grid { grid-template-columns: 1fr; }
   .macro-wrap { grid-template-columns: 1fr; }
+  .diet-step-grid { grid-template-columns: 1fr; }
+  .diet-step { min-height: 0; }
+  .easy-meal-grid { grid-template-columns: 1fr; }
   .info-grid { grid-template-columns: repeat(2, 1fr); }
   .nutri-form { grid-template-columns: repeat(2, 1fr); }
   .page-head h1 { font-size: 36px; }

@@ -141,14 +141,14 @@
     <section>
       <div class="hero">
         <div class="badge-row">
-          <span class="tag tag-accent">开源 · 纯前端</span>
+          <span class="tag tag-accent">初学者友好 · 每周 3 练</span>
           <span class="tag">零依赖 · 数据本地存储</span>
           <span class="tag tag-blue">为 ${round1(profile.height)}cm / ${round1(profile.weight)}kg 定制</span>
         </div>
         <h1>瘦子的<span class="hl">薄肌</span>养成计划<span class="thin"> · 16 周</span></h1>
         <p class="lead">
           不追求大块头，目标是<b>穿衣显瘦、脱衣有肉</b>：宽肩、细腰、清晰的胸腹线条。
-          四个阶段循序渐进——从全身适应到推拉腿塑形，配套饮食计算与打卡追踪。
+          四个阶段循序渐进——从动作入门到独立训练，配套饮食计算与打卡追踪。
           目前已完成 <b class="accent">${done} / ${plannedTotal()}</b> 次训练。
         </p>
         <div class="cta-row">
@@ -280,7 +280,7 @@
 
   /* ================= 视图：动作库 ================= */
   function viewExercises() {
-    const muscles = ["全部", "胸", "背", "肩", "腿", "手臂", "核心"];
+    const muscles = ["全部", "胸", "背", "肩", "腿", "核心"];
     const chips = muscles.map((m) =>
       `<button class="chip ${exFilter === m ? "active" : ""}" data-exfilter="${m}" aria-pressed="${exFilter === m}">${m}</button>`
     ).join("");
@@ -291,7 +291,7 @@
       <div class="page-head">
         <div>
           <h1>动作库</h1>
-          <p class="muted">共 ${EXERCISES.length} 个动作 · 点击标签筛选部位 · 每个动作都有替代方案</p>
+          <p class="muted">只保留计划会用到的 ${EXERCISES.length} 个入门动作 · 每个动作都有要点、常见错误和替代方案</p>
         </div>
       </div>
       <div class="chip-row">${chips}</div>
@@ -426,6 +426,23 @@
             <p class="muted" style="font-size:12.5px">蛋白质 2g/kg 体重 · 脂肪 1g/kg 体重 · 其余热量全部给碳水（训练的燃料）。</p>
           </div>
         </div>
+      </div>
+
+      <div class="section-title"><h2>初学者先做好这 3 步</h2><span class="sub">不要频繁改食谱，用体重趋势做决定</span></div>
+      <div class="diet-step-grid">
+        ${DIET_STEPS.map((step) => `
+          <div class="diet-step">
+            <span class="diet-step-no">${step.n}</span>
+            <h3>${step.t}</h3>
+            <p>${step.d}</p>
+          </div>`).join("")}
+      </div>
+
+      <div class="section-title"><h2>最简单的吃法</h2><span class="sub">先做到，再逐步优化</span></div>
+      <div class="grid grid-2 easy-meal-grid">
+        ${EASY_MEAL_RULES.map((rule) => `
+          <div class="card easy-meal-card"><h3>${rule.t}</h3><p>${rule.d}</p></div>
+        `).join("")}
       </div>
 
       <div class="section-title"><h2>一日食谱示例</h2><span class="sub">约 3000 kcal · 按你的目标热量等比增减</span></div>
