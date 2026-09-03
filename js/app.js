@@ -1,5 +1,5 @@
 /* ============================================================
-   薄肌计划 BOJI · 应用逻辑
+   薄肌俱乐部 BOJI · 应用逻辑
    零依赖 · hash 路由 · localStorage 持久化
    ============================================================ */
 
@@ -78,6 +78,8 @@
   let checkins = normalizeCheckins(load(KEY.checkins, {})); // { "3": [true,false,true] }
   let selWeek = Math.round(clamp(load(KEY.week, 1), 1, 16, 1));
   let exFilter = "全部";
+  // 置顶三大动作当前显示动图的卡片（key 集合）；默认全部显示 B 站视频
+  const featAnimMode = new Set();
 
   /* ================= 工具 ================= */
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => (
@@ -278,6 +280,102 @@
     </section>`;
   }
 
+  /* ================= 视图：动作库 · 三大基础动作置顶 ================= */
+  // 循环动图用内联 SVG + SMIL 实现（零依赖、无网络请求），两个关键姿势之间平滑插值
+  const ANIM_ATTRS = 'dur="3.2s" repeatCount="indefinite" calcMode="spline"'
+    + ' keyTimes="0;0.42;0.55;0.97;1"'
+    + ' keySplines="0.45 0 0.55 1;0 0 1 1;0.45 0 0.55 1;0 0 1 1"';
+
+  function animPoints(p1, p2) {
+    return `<animate attributeName="points" ${ANIM_ATTRS} values="${p1};${p2};${p2};${p1};${p1}"/>`;
+  }
+  function animCircle(axis, v1, v2) {
+    return `<animate attributeName="${axis}" ${ANIM_ATTRS} values="${v1};${v2};${v2};${v1};${v1}"/>`;
+  }
+
+  function featuredAnimSvg(item) {
+    const figures = {
+      // 俯卧撑：以脚尖为轴，身体直线上下；手撑点固定，肘部屈伸
+      pushup: () => `
+        <line class="anim-ground" x1="36" y1="110" x2="188" y2="110"/>
+        <polyline class="anim-limb" points="162,110 154,108 141,105 117,98 76,86">
+          ${animPoints("162,110 154,108 141,105 117,98 76,86", "162,110 154,109 140,108 115,106 73,102")}
+        </polyline>
+        <circle class="anim-head" cx="61" cy="81" r="7">
+          ${animCircle("cx", 61, 57)}${animCircle("cy", 81, 101)}
+        </circle>
+        <polyline class="anim-limb" points="76,86 69,98 63,110">
+          ${animPoints("76,86 69,98 63,110", "73,102 80,107 63,110")}
+        </polyline>`,
+      // 深蹲：屈髋向后坐，膝盖前移，手臂前平举配重
+      squat: () => `
+        <line class="anim-ground" x1="40" y1="110" x2="170" y2="110"/>
+        <polyline class="anim-limb" points="74,110 98,110"/>
+        <polyline class="anim-limb" points="88,108 90,80 88,54 90,30">
+          ${animPoints("88,108 90,80 88,54 90,30", "88,108 114,98 88,100 103,82")}
+        </polyline>
+        <circle class="anim-head" cx="91" cy="17" r="8">
+          ${animCircle("cx", 91, 113)}${animCircle("cy", 17, 71)}
+        </circle>
+        <polyline class="anim-limb" points="90,30 110,33 130,36">
+          ${animPoints("90,30 110,33 130,36", "103,82 124,85 144,88")}
+        </polyline>`,
+      // 仰卧起坐：以髋为轴卷起上身，双腿屈膝固定，双手扶头
+      situp: () => `
+        <line class="anim-ground" x1="24" y1="110" x2="196" y2="110"/>
+        <polyline class="anim-limb" points="95,103 127,90 114,106 128,109"/>
+        <polyline class="anim-limb" points="60,104 95,103">
+          ${animPoints("60,104 95,103", "73,76 95,103")}
+        </polyline>
+        <circle class="anim-head" cx="44" cy="103" r="7">
+          ${animCircle("cx", 44, 64)}${animCircle("cy", 103, 66)}
+        </circle>
+        <polyline class="anim-limb" points="60,104 44,110 49,96">
+          ${animPoints("60,104 44,110 49,96", "73,76 59,84 61,70")}
+        </polyline>`,
+    };
+    const body = figures[item.key] ? figures[item.key]() : "";
+    return `<svg class="anim-fig" viewBox="0 0 220 130" role="img" aria-label="${esc(item.name)}标准动作循环演示">${body}</svg>`;
+  }
+
+  function biliEmbed(f) {
+    return `
+      <div class="bili-embed">
+        <iframe src="https://player.bilibili.com/player.html?bvid=${encodeURIComponent(f.bvid)}&page=1&high_quality=1&danmaku=0&autoplay=0"
+          title="${esc(f.videoTitle)}" loading="lazy" scrolling="no" allowfullscreen></iframe>
+      </div>`;
+  }
+
+  function viewFeatured() {
+    const cards = FEATURED_EXERCISES.map((f) => {
+      const showAnim = featAnimMode.has(f.key);
+      const visual = showAnim
+        ? `${featuredAnimSvg(f)}<span class="feat-badge">动图演示</span>`
+        : biliEmbed(f);
+      const toggle = showAnim
+        ? `<button class="btn btn-primary btn-sm" type="button" data-feat-toggle="${esc(f.key)}">▶ 播放视频演示</button>`
+        : `<button class="btn btn-ghost btn-sm" type="button" data-feat-toggle="${esc(f.key)}">▶ 查看动图</button>`;
+      return `
+      <div class="feat-card">
+        <div class="feat-visual">${visual}</div>
+        <div class="feat-info">
+          <div class="feat-title"><h3>${esc(f.name)}</h3><span class="feat-sub">${esc(f.sub)}</span></div>
+          <p class="feat-desc">${esc(f.desc)}</p>
+          <p class="feat-err"><b>常见错误：</b>${esc(f.common)}</p>
+          <div class="feat-actions">
+            ${toggle}
+            <a class="btn btn-ghost btn-sm" href="https://www.bilibili.com/video/${esc(f.bvid)}/" target="_blank" rel="noopener noreferrer">在 B 站打开 ↗</a>
+          </div>
+          <p class="feat-credit muted2">视频：《${esc(f.videoTitle)}》· @${esc(f.videoAuthor)}</p>
+        </div>
+      </div>`;
+    }).join("");
+
+    return `
+      <div class="section-title tight"><h2>三大基础动作</h2><span class="sub">俯卧撑 · 深蹲 · 仰卧起坐 · 默认 B 站视频讲解，可切换动图</span></div>
+      <div class="feat-grid">${cards}</div>`;
+  }
+
   /* ================= 视图：动作库 ================= */
   function viewExercises() {
     const muscles = ["全部", "胸", "背", "肩", "腿", "核心"];
@@ -291,9 +389,11 @@
       <div class="page-head">
         <div>
           <h1>动作库</h1>
-          <p class="muted">只保留计划会用到的 ${EXERCISES.length} 个入门动作 · 每个动作都有要点、常见错误和替代方案</p>
+          <p class="muted">置顶三大基础动作动图演示 · 下方是计划会用到的 ${EXERCISES.length} 个入门动作，按部位筛选</p>
         </div>
       </div>
+      ${viewFeatured()}
+      <div class="section-title tight"><h2>全部入门动作</h2><span class="sub">每个动作都有要点、常见错误和替代方案</span></div>
       <div class="chip-row">${chips}</div>
       <div class="ex-grid">
         ${list.map((e) => `
@@ -551,11 +651,20 @@
     });
   }
 
+  // 尊重系统「减少动态效果」设置：暂停动作演示循环动画
+  function pauseFigAnimations() {
+    if (!window.matchMedia || !matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    document.querySelectorAll("svg.anim-fig").forEach((s) => {
+      try { s.pauseAnimations(); } catch (e) { /* 忽略不支持 SMIL 控制的浏览器 */ }
+    });
+  }
+
   function render(keepScroll) {
     const y = window.scrollY;
     const route = currentRoute();
     app.innerHTML = routes[route]();
     syncNav(route);
+    pauseFigAnimations();
     if (keepScroll) window.scrollTo(0, y);
     else window.scrollTo(0, 0);
   }
@@ -638,6 +747,16 @@
     const chip = t.closest("[data-exfilter]");
     if (chip) {
       exFilter = chip.dataset.exfilter;
+      render(true);
+      return;
+    }
+
+    // 置顶动作：视频 / 动图 切换（默认视频）
+    const featToggle = t.closest("[data-feat-toggle]");
+    if (featToggle) {
+      const key = featToggle.dataset.featToggle;
+      if (featAnimMode.has(key)) featAnimMode.delete(key);
+      else featAnimMode.add(key);
       render(true);
       return;
     }

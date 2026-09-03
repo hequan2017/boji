@@ -1,5 +1,5 @@
 /* ============================================================
-   薄肌计划 BOJI · 样式
+   薄肌俱乐部 BOJI · 样式
    零依赖 · Apple 风格 · 移动端优先
    ============================================================ */
 
@@ -627,6 +627,67 @@ details.ws .ws-body { padding: 0 16px 12px; font-size: 12.5px; color: var(--mute
 .ex-card dt { display: inline; font-weight: 800; color: var(--text); margin-right: 6px; font-size: 12px; }
 .ex-card dd { display: inline; margin: 0; }
 
+/* ---------- 动作库 · 三大基础动作置顶 ---------- */
+.section-title.tight { margin-top: 40px; }
+.feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.feat-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  overflow: hidden;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.feat-card:hover { transform: translateY(-3px); border-color: var(--line2); box-shadow: var(--shadow); }
+.feat-visual {
+  position: relative;
+  aspect-ratio: 22 / 13;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(320px 170px at 50% 0%, var(--hero-glow-a), transparent 70%),
+    var(--bg2);
+  border-bottom: 1px solid var(--line);
+}
+.feat-visual .anim-fig { width: 100%; height: 100%; color: var(--accent); }
+.anim-fig .anim-limb {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.anim-fig .anim-head { fill: currentColor; }
+.anim-fig .anim-ground { stroke: var(--line2); stroke-width: 2; stroke-linecap: round; }
+.feat-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+  background: var(--accent-dim);
+  border: 1px solid rgba(41, 151, 255, 0.35);
+}
+.feat-info { display: flex; flex-direction: column; gap: 8px; padding: 18px 20px 20px; flex: 1; }
+.feat-title { display: flex; align-items: baseline; gap: 8px; }
+.feat-title h3 { font-size: 20px; letter-spacing: -0.02em; }
+.feat-sub { font-size: 12px; font-weight: 700; color: var(--muted2); }
+.feat-desc { margin: 0; font-size: 13.5px; color: var(--muted); }
+.feat-err { margin: 0; font-size: 12.5px; color: var(--muted2); }
+.feat-err b { color: var(--muted); }
+.feat-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: auto; padding-top: 4px; }
+.feat-credit { margin: 0; font-size: 11.5px; }
+
+/* B 站外链播放器（置顶动作默认展示，可切换为动图） */
+.bili-embed { position: absolute; inset: 0; background: var(--bg2); }
+.bili-embed iframe { display: block; width: 100%; height: 100%; border: 0; }
+
 /* ---------- 饮食页 ---------- */
 .nutri-form { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; align-items: end; }
 .field { display: flex; flex-direction: column; gap: 5px; }
@@ -813,6 +874,7 @@ html[data-theme="light"] .week-btn.done { border-color: rgba(0, 113, 227, 0.5); 
 html[data-theme="light"] .week-btn.done::after { color: var(--accent); }
 html[data-theme="light"] .day-card.done { border-color: rgba(0, 113, 227, 0.45); }
 html[data-theme="light"] .tag-accent { border-color: rgba(0, 113, 227, 0.3); }
+html[data-theme="light"] .feat-badge { border-color: rgba(0, 113, 227, 0.3); }
 html[data-theme="light"] .tag-blue { border-color: rgba(0, 113, 227, 0.3); }
 html[data-theme="light"] .tag-orange { border-color: rgba(199, 116, 21, 0.35); }
 html[data-theme="light"] .tag-red { border-color: rgba(209, 72, 55, 0.35); }
@@ -834,6 +896,7 @@ html[data-theme="light"] .ex-card:hover { box-shadow: var(--shadow); }
   .info-grid { grid-template-columns: repeat(3, 1fr); }
   .ex-grid { grid-template-columns: repeat(2, 1fr); }
   .nutri-form { grid-template-columns: repeat(3, 1fr); }
+  .feat-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 720px) {
   body { font-size: 14.5px; padding-bottom: var(--bottomnav-h); }
