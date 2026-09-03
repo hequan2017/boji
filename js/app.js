@@ -252,7 +252,7 @@
       <div class="phase-detail" style="--pc:${phase.color}">
         <div class="pd-head">
           <h3>第 ${phase.id} 阶段 · ${phase.name}</h3>
-          <span class="tag" style="color:${phase.color};border-color:${phase.color}">${phase.weeks}</span>
+          <span class="tag">${phase.weeks}</span>
         </div>
         <p class="pd-goal">${phase.goal}</p>
         <div class="info-grid">
