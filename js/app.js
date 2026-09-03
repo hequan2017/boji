@@ -464,6 +464,12 @@
   function viewNutrition() {
     const n = calcNutrition();
     const total = n.pKcal + n.fKcal + n.cKcal;
+    // 示例食谱总量 vs 用户目标：给出等比缩放提示
+    const mealTotal = MEALS.reduce((sum, m) => sum + (parseInt(String(m.kcal).replace(/\D/g, ""), 10) || 0), 0);
+    const ratio = mealTotal ? Math.round((n.target / mealTotal) * 100) : 100;
+    const ratioHint = Math.abs(ratio - 100) <= 3
+      ? "与你的目标基本一致，照着吃就行"
+      : `约为示例的 ${ratio}%，主食和加餐按比例增减`;
     const bar = (kcal, color) =>
       `<i style="width:${Math.round((kcal / total) * 100)}%;background:var(--chart-${color})"></i>`;
 
@@ -550,7 +556,17 @@
         `).join("")}
       </div>
 
-      <div class="section-title"><h2>一日食谱示例</h2><span class="sub">约 3000 kcal · 按你的目标热量等比增减</span></div>
+      <div class="section-title"><h2>不用厨房秤：手掌分量法</h2><span class="sub">出门在外也能估个八九不离十 · 增重期在基数上「加」，不要减</span></div>
+      <div class="principle-grid" style="margin-bottom:14px">
+        ${PORTION_GUIDE.map((p) => `
+          <div class="mini-card">
+            <div class="ico">${p.ico}</div>
+            <h4>${p.t}</h4>
+            <p>${p.d}</p>
+          </div>`).join("")}
+      </div>
+
+      <div class="section-title"><h2>一日食谱示例</h2><span class="sub">约 ${mealTotal} kcal · 你的目标 ${ratioHint}</span></div>
       <div class="card" style="margin-bottom:14px">
         <div class="meal-timeline">
           ${MEALS.map((m) => `
@@ -561,10 +577,47 @@
         </div>
       </div>
 
+      <div class="section-title"><h2>一周怎么轮着吃</h2><span class="sub">可直接整周照抄 · 周日晨起称重复盘</span></div>
+      <div class="week-meal-grid" style="margin-bottom:14px">
+        <div class="wm-head"><span></span><span>早餐</span><span>午餐</span><span>加餐</span><span>晚餐</span></div>
+        ${WEEK_MEALS.map((d) => `
+          <div class="week-meal-row">
+            <div class="wm-day">${d.day}</div>
+            <div><span class="wm-lbl">早餐</span>${d.breakfast}</div>
+            <div><span class="wm-lbl">午餐</span>${d.lunch}</div>
+            <div><span class="wm-lbl">加餐</span>${d.snack}</div>
+            <div><span class="wm-lbl">晚餐</span>${d.dinner}</div>
+          </div>`).join("")}
+      </div>
+
+      <div class="section-title"><h2>食材互换表</h2><span class="sub">同组可以互换 · 食谱里的每样食材都能换</span></div>
+      <div class="swap-grid" style="margin-bottom:14px">
+        ${FOOD_SWAPS.map((g) => `
+          <div class="swap-card">
+            <h3>${g.t}<span class="sw-note">${g.note}</span></h3>
+            <div class="swap-tags">${g.items.map((i) => `<span class="tag">${i}</span>`).join("")}</div>
+          </div>`).join("")}
+      </div>
+
+      <div class="section-title"><h2>外食生存指南</h2><span class="sub">食堂 / 外卖 / 聚餐 / 便利店 · 总热量优先</span></div>
+      <div class="grid grid-2 easy-meal-grid" style="margin-bottom:14px">
+        ${EATING_OUT.map((o) => `
+          <div class="card easy-meal-card"><h3>${o.t}</h3><p>${o.d}</p></div>`).join("")}
+      </div>
+
       <div class="section-title"><h2>瘦人增重技巧</h2><span class="sub">比「吃什么」更重要的事</span></div>
       <ul class="tip-list" style="margin-bottom:14px">
         ${TIPS.map((t) => `<li><span><b>${t.t}</b>：${t.d}</span></li>`).join("")}
       </ul>
+
+      <div class="section-title"><h2>新手饮食误区</h2><span class="sub">先把这几个最常见的坑绕开</span></div>
+      <div class="faq" style="margin-bottom:14px">
+        ${DIET_FAQS.map((f) => `
+          <details class="faq-item">
+            <summary>${f.q}</summary>
+            <div class="faq-body">${f.a}</div>
+          </details>`).join("")}
+      </div>
 
       <div class="section-title"><h2>补剂：理性看待</h2><span class="sub">没有一种补剂能替代训练和吃饭</span></div>
       <div class="sup-grid">
